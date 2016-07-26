@@ -1,0 +1,48 @@
+version: '2.0'
+services:
+  web:
+    image: vishnuatrai/nginx-trusty:initial
+    build:
+      context: ./containers/web
+      dockerfile: ./Dockerfile
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - app
+    links:
+      - app
+  app:
+    image: unicorn-app
+    build:
+      context: .
+      dockerfile: ./containers/app/Dockerfile
+    ports: 
+      - "3000:3000"
+    volumes: 
+      - .:/app/RailsApp
+    depends_on:
+      - db
+      - cache
+    links:
+      - db
+      - cache
+
+  db:
+    image: vishnuatrai/mysql-trusty:initial
+    build: 
+      context: ./containers/db
+      dockerfile: ./Dockerfile
+    ports: 
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+
+  cache:
+    image: vishnuatrai/redis-trusty:initial
+    build:
+      context: ./containers/cache
+      dockerfile: ./Dockerfile
+    ports: 
+      - "6379:6379"
+
